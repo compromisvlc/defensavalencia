@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="ca">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Al·legacions València — Generador PDF</title>
+    <meta name="description" content="Miniapp per generar un PDF d'al·legacions sobre el canvi de denominació del municipi de València." />
+    <!-- jsPDF (UMD) -->
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" defer></script>
+    <style>
+      :root{
+        --orange:#f97316;
+        --orange-dark:#ea580c;
+        --orange-ink:#9a3412;
+        --bg:#fff;
+        --text:#111827;
+        --muted:#6b7280;
+        --ok:#166534;
+        --error:#b91c1c;
+        --ring:#fed7aa;
+        --radius:16px;
+      }
+      *{box-sizing:border-box}
+      html,body{height:100%}
+      body{
+        margin:0;
+        background:var(--orange);
+        color:var(--text);
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        display:grid;
+        place-items:center;
+        padding:24px;
+      }
+      .card{
+        width:100%;
+        max-width: 720px;
+        background:var(--bg);
+        border-radius: var(--radius);
+        padding: 28px;
+        box-shadow: 0 10px 30px rgba(0,0,0,.15);
+        transition: transform .3s ease, box-shadow .3s ease;
+      }
+      .card:hover{ transform: translateY(-2px); box-shadow: 0 14px 40px rgba(0,0,0,.18); }
+      h1{ margin:.25rem 0 1rem; font-size: clamp(1.25rem, 2vw, 1.5rem); text-align:center }
+      .grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+      .grid .full{ grid-column: 1 / -1;}
+      label{ display:block; font-size:.9rem; font-weight:600; margin-bottom:6px }
+      input[type="text"]{
+        width:100%;
+        padding:10px 12px;
+        border:1px solid #d1d5db;
+        border-radius:10px;
+        outline: none;
+        transition: box-shadow .15s, border-color .15s, transform .05s;
+      }
+      input[type="text"]:focus{
+        border-color: var(--orange);
+        box-shadow: 0 0 0 4px var(--ring);
+      }
+      .msg{ font-size:.8rem; margin-top:6px; min-height:1.1em }
+      .msg.ok{ color: var(--ok) }
+      .msg.err{ color: var(--error) }
+      .actions{ margin-top: 14px; display:flex; gap: 10px; flex-wrap: wrap; justify-content:center }
+      button, a.btn{
+        appearance:none;
+        border:0;
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-weight:700;
+        color:#fff;
+        background: var(--orange-dark);
+        cursor:pointer;
+        text-decoration:none;
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        transition: transform .06s ease, filter .2s ease, background .2s ease;
+      }
+      button:hover, a.btn:hover{ filter: brightness(1.05); }
+      button:active, a.btn:active{ transform: translateY(1px); }
+      button[disabled]{ background:#9ca3af; cursor:not-allowed }
+      .secondary{ background:#111827 }
+      .link{
+        color: var(--orange-ink);
+        font-weight:700;
+        text-decoration: underline;
+      }
+      .status{ text-align:center; margin-top:8px; font-size:.9rem }
+      .toast{
+        position: fixed;
+        left:50%; transform: translateX(-50%);
+        bottom: 18px;
+        background:#111827;
+        color:#fff;
+        padding:10px 14px;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,.3);
+        opacity:0; pointer-events:none;
+        transition: opacity .3s ease, transform .3s ease;
+      }
+      .toast.show{ opacity:1; transform: translate(-50%, -6px); }
+      .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0 }
+      @media (max-width:640px){ .grid{ grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <main class="card" role="main">
+      <h1>Formulari d'Al·legacions</h1>
+      <p class="status" id="status" aria-live="polite"></p>
+      <form id="form" novalidate>
+        <div class="grid">
+          <div>
+            <label for="nom">Nom</label>
+            <input type="text" id="nom" name="nom" autocomplete="given-name" placeholder="Maria" required>
+            <div class="msg" id="msg-nom"></div>
+          </div>
+          <div>
+            <label for="cognoms">Cognoms</label>
+            <input type="text" id="cognoms" name="cognoms" autocomplete="family-name" placeholder="Pérez Garcia" required>
+            <div class="msg" id="msg-cognoms"></div>
+          </div>
+          <div>
+            <label for="dni">DNI</label>
+            <input type="text" id="dni" name="dni" inputmode="text" placeholder="12345678Z" required>
+            <div class="msg" id="msg-dni"></div>
+          </div>
+          <div class="full">
+            <label for="adreca">Adreça</label>
+            <input type="text" id="adreca" name="adreca" autocomplete="street-address" placeholder="C/ Exemples, 1, 46000 València" required>
+            <div class="msg" id="msg-adreca"></div>
+          </div>
+        </div>
+        <div class="actions">
+          <button type="submit" id="btnGen" disabled>Generar al·legació</button>
+          <a id="btnDl" class="btn secondary" href="#" download style="display:none">Descarregar PDF</a>
+        </div>
+        <div class="status" id="postGen" style="display:none">
+          <a class="link" href="https://sede.valencia.es/sede/registro/procedimiento/NC.NC.10" target="_blank" rel="noopener">Presentar al·legació</a>
+          <div style="margin-top:6px">Puja el document a la web municipal i signa'l</div>
+        </div>
+      </form>
+    </main>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <script>
+      // Utilities
+      const $ = (sel) => document.querySelector(sel);
+      const setText = (el, text, cls) => { el.textContent = text || ""; el.className = "msg" + (cls ? " " + cls : ""); };
+
+      // Validation helpers
+      const fields = ["nom","cognoms","dni","adreca"];
+      const msgs = { nom: $("#msg-nom"), cognoms: $("#msg-cognoms"), dni: $("#msg-dni"), adreca: $("#msg-adreca") };
+      const inputs = { nom: $("#nom"), cognoms: $("#cognoms"), dni: $("#dni"), adreca: $("#adreca") };
+      const btnGen = $("#btnGen");
+      const btnDl = $("#btnDl");
+      const status = $("#status");
+      const postGen = $("#postGen");
+      const toast = $("#toast");
+
+      const dniOk = (v) => {
+        // Validació bàsica: 8 dígits + lletra o NIE (flexible si no coincideix)
+        const t = v.trim();
+        if (!t) return false;
+        const dni = /^[0-9]{7,8}[A-Za-z]$/;
+        const nie = /^[XYZ][0-9]{7}[A-Za-z]$/;
+        return dni.test(t) || nie.test(t) || t.length >= 5;
+      };
+
+      function validate(show= false){
+        let ok = true;
+        fields.forEach((f) => {
+          const v = inputs[f].value.trim();
+          const good = f === "dni" ? dniOk(v) : v.length > 0;
+          if (!good) ok = false;
+
+          if (show){
+            if (!good){
+              inputs[f].setAttribute("aria-invalid","true");
+              setText(msgs[f], "Camp obligatori", "err");
+              inputs[f].style.borderColor = "var(--error)";
+              inputs[f].style.boxShadow = "0 0 0 4px rgba(239, 68, 68, .2)";
+            } else {
+              inputs[f].setAttribute("aria-invalid","false");
+              setText(msgs[f], "✔︎ Correcte", "ok");
+              inputs[f].style.borderColor = "#d1d5db";
+              inputs[f].style.boxShadow = "none";
+            }
+          }
+        });
+        btnGen.disabled = !ok;
+        return ok;
+      }
+
+      function toastMsg(text){
+        toast.textContent = text;
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 2200);
+      }
+
+      function formatDateValencia(){
+        const d = new Date();
+        const mesos = ["gener","febrer","març","abril","maig","juny","juliol","agost","setembre","octubre","novembre","desembre"];
+        const m = mesos[d.getMonth()];
+        const needsApos = (m === "abril" || m === "agost" || m === "octubre");
+        const prep = needsApos ? "d’" : "de ";
+        return `${d.getDate()} ${prep}${m} de ${d.getFullYear()}`;
+      }
+
+      function buildPdf(){
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ unit: "pt", format: "a4" });
+
+        const marginX = 56;
+        const marginTop = 56;
+        const lineH = 16;
+        let y = marginTop;
+
+        // Heading
+        doc.setFont(undefined, "bold");
+        doc.setFontSize(14);
+        const title = "AL·LEGACIONS AL PROCEDIMENT DE CANVI DE DENOMINACIÓ DEL MUNICIPI DE VALÈNCIA";
+        const titleLines = doc.splitTextToSize(title, 482);
+        doc.text(titleLines, marginX, y);
+        y += titleLines.length * (lineH + 2) + 8;
+
+        // Header block
+        doc.setFontSize(11);
+        doc.setFont(undefined, "normal");
+        const head = [
+          `NOM: ${inputs.nom.value.trim()}`,
+          `COGNOMS: ${inputs.cognoms.value.trim()}`,
+          `DNI: ${inputs.dni.value.trim()}`,
+          `ADREÇA: ${inputs.adreca.value.trim()}`,
+          "",
+          "EXPOSA:"
+        ];
+        head.forEach((line)=>{
+          if (y > 770) { doc.addPage(); y = marginTop; }
+          doc.text(line, marginX, y); y += lineH + 2;
+        });
+
+        const firstParagraph = "La proposta de canvi de denominació oficial contradiu informes tècnics, vulnera clarament la normativa i la legalitat municipal i autonòmica vigent i no respon a cap necessitat real ni lingüística ni social. Lluny de reforçar la convivència, genera divisió i crispació en un àmbit on no existia conflicte real, i suposa una despesa econòmica injustificada tant per a les administracions com per a la ciutadania.";
+
+        const lastParagraph = `SOL·LICITE: Que es tinguen per presentades estes al·legacions i, en conseqüència, es desestime la proposta de canvi de denominació del municipi de València per la forma dual “Valencia/Valéncia”, mantenint-se la forma oficial en valencià per ser la legalment establerta, coherent, eficient, lingüísticament fixada, i -com el propi reglament municipal diu- històrica i correcta: “València” en valencià. A València, a ${formatDateValencia()}`;
+
+        const bodyLines = doc.splitTextToSize(firstParagraph + "\\n\\n" + lastParagraph, 482);
+        bodyLines.forEach((line)=>{
+          if (y > 770) { doc.addPage(); y = marginTop; }
+          doc.text(line, marginX, y); y += lineH + 2;
+        });
+
+        // Blob + download URL
+        const blob = doc.output("blob");
+        const url = URL.createObjectURL(blob);
+        return url;
+      }
+
+      // Bindings
+      fields.forEach((f)=>{
+        inputs[f].addEventListener("input", () => validate(false));
+        inputs[f].addEventListener("blur", () => validate(true));
+      });
+
+      $("#form").addEventListener("submit", (e)=>{
+        e.preventDefault();
+        const ok = validate(true);
+        if (!ok){
+          const firstBad = fields.find((f)=> (f==="dni" ? !dniOk(inputs[f].value) : inputs[f].value.trim().length === 0));
+          if (firstBad){ inputs[firstBad].focus(); inputs[firstBad].scrollIntoView({behavior:"smooth", block:"center"}); }
+          toastMsg("Revisa els camps marcats en roig");
+          return;
+        }
+        status.textContent = "Generant PDF…";
+        // Ensure jsPDF loaded
+        const tryBuild = () => {
+          if (!window.jspdf || !window.jspdf.jsPDF){ return setTimeout(tryBuild, 50); }
+          const url = buildPdf();
+          btnDl.href = url;
+          btnDl.style.display = "inline-flex";
+          btnDl.click(); // autodescarrega
+          status.textContent = "PDF generat. Pots descarregar-lo o presentar-lo.";
+          postGen.style.display = "block";
+          toastMsg("PDF llest!");
+        };
+        tryBuild();
+      });
+    </script>
+  </body>
+</html>
