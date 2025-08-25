@@ -123,10 +123,7 @@
   <body>
     <img src="logo.svg" alt="Logo" class="logo">
     <main class="card" role="main">
-      <h1>Crea i baixa ràpidament la teua al·legació contra l'intent de María José Catalá de canviar el nom de València.      </h1>
-      <p id="desc2" style="text-align:center; margin-bottom:1.5rem; line-height:1.5; color:#353949; font-size:0.9rem;">
-        Com PP i VOX no són capaços de millorar la vida dels valencians i valencianes, només treballen per a crear nous problemes que ens fan perdre identitat, temps i diners. No permetes que canvien l'històric nom valencià de la ciutat per una fòrmula artificial i saltant-se la llei.
-      </p>
+      <h1>Crea i descarrega ràpidament la teua al·legació contra l'intent de María José Catalá de canviar el nom de València.      </h1>
       <p class="status" id="status" aria-live="polite"></p>
       <form id="form" novalidate>
         <div class="grid">
@@ -413,9 +410,6 @@
           // Hide form and show success message
           $("#form").style.display = "none";
           $("h1").style.display = "none";
-          // Hide description paragraph
-          const desc2 = $("#desc2");
-          if (desc2) desc2.style.display = "none";
           status.textContent = "";
           postGen.style.display = "block";
           toastMsg("PDF generat i baixat!");
