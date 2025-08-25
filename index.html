@@ -13,7 +13,7 @@
         --orange-dark:#ea580c;
         --orange-ink:#9a3412;
         --bg:#fff;
-        --text:#111827;
+        --text:#353949;
         --muted:#6b7280;
         --ok:#166534;
         --error:#b91c1c;
@@ -24,12 +24,20 @@
       html,body{height:100%}
       body{
         margin:0;
-        background:var(--orange);
-        color:var(--text);
+        background:linear-gradient(135deg, #d23517, #f39128);
+        color:#353949;
         font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-        display:grid;
-        place-items:center;
+        display:flex;
+        flex-direction:column;
+        align-items:center;
         padding:24px;
+        min-height:100vh;
+      }
+      .logo{
+        display:block;
+        max-width:300px;
+        height:auto;
+        margin:0 auto 2rem;
       }
       .card{
         width:100%;
@@ -68,7 +76,7 @@
         padding: 12px 16px;
         font-weight:700;
         color:#fff;
-        background: var(--orange-dark);
+        background: #FF6720;
         cursor:pointer;
         text-decoration:none;
         display:inline-flex;
@@ -100,12 +108,25 @@
       }
       .toast.show{ opacity:1; transform: translate(-50%, -6px); }
       .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0 }
-      @media (max-width:640px){ .grid{ grid-template-columns: 1fr; } }
+      @media (max-width:640px){ 
+        .grid{ grid-template-columns: 1fr; }
+        .card{ padding: 20px; }
+        body{ padding: 16px; }
+      }
+      @media (max-width:480px){
+        .card{ padding: 16px; }
+        h1{ font-size: 1.25rem; }
+        body{ padding: 12px; }
+      }
     </style>
   </head>
   <body>
+    <img src="logo.svg" alt="Logo" class="logo">
     <main class="card" role="main">
-      <h1>Formulari d'Al·legacions</h1>
+      <h1>Crea i baixa ràpidament la teua al·legació contra l'intent de María José Catalá de canviar el nom de València.      </h1>
+      <p id="desc2" style="text-align:center; margin-bottom:1.5rem; line-height:1.5; color:#353949; font-size:0.9rem;">
+        Com PP i VOX no són capaços de millorar la vida dels valencians i valencianes, només treballen per a crear nous problemes que ens fan perdre identitat, temps i diners. No permetes que canvien l'històric nom valencià de la ciutat per una fòrmula artificial i saltant-se la llei.
+      </p>
       <p class="status" id="status" aria-live="polite"></p>
       <form id="form" novalidate>
         <div class="grid">
@@ -130,16 +151,24 @@
             <div class="msg" id="msg-adreca"></div>
           </div>
         </div>
-        <div class="actions">
+        <div class="actions" id="formActions">
           <button type="submit" id="btnGen" disabled>Generar al·legació</button>
-          <a id="btnDl" class="btn secondary" href="#" download style="display:none">Descarregar PDF</a>
-        </div>
-        <div class="status" id="postGen" style="display:none">
-          <a class="link" href="https://sede.valencia.es/sede/registro/procedimiento/NC.NC.10" target="_blank" rel="noopener">Presentar al·legació</a>
-          <div style="margin-top:6px">Puja el document a la web municipal i signa'l</div>
         </div>
       </form>
+      <div class="status" id="postGen" style="display:none">
+        <h2 style="color:#353949; margin-bottom:1rem; text-align:center">Al·legació generada correctament!</h2>
+        <p style="text-align:center; margin-bottom:1.5rem">La descàrrega s'ha iniciat automàticament. Si no s'ha baixat, podeu tornar a baixar-la fent clic en l'enllaç de baix.</p>
+        <div style="text-align:center; margin-bottom:1.5rem">
+          <a id="btnDl" href="#" download style="display:none; color:#d23517; text-decoration:underline; font-weight:500">Tornar a baixar PDF</a>
+        </div>
+        <div style="display:flex; justify-content:center">
+          <a class="btn" href="https://sede.valencia.es/sede/authClave.xhtml/NC.NC.10" target="_blank" rel="noopener">Presentar al·legació</a>
+        </div>
+      </div>
     </main>
+    <div style="text-align:center; margin-top:1rem;">
+      <a href="privacy.html" style="color:#353949; text-decoration:underline; font-size:0.85rem;">Política de privacitat</a>
+    </div>
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     <script>
@@ -158,12 +187,31 @@
       const toast = $("#toast");
 
       const dniOk = (v) => {
-        // Validació bàsica: 8 dígits + lletra o NIE (flexible si no coincideix)
-        const t = v.trim();
+        const t = v.trim().toUpperCase();
         if (!t) return false;
-        const dni = /^[0-9]{7,8}[A-Za-z]$/;
-        const nie = /^[XYZ][0-9]{7}[A-Za-z]$/;
-        return dni.test(t) || nie.test(t) || t.length >= 5;
+        
+        // DNI validation
+        const dniMatch = t.match(/^([0-9]{8})([A-Z])$/);
+        if (dniMatch) {
+          const numbers = parseInt(dniMatch[1]);
+          const letter = dniMatch[2];
+          const expectedLetter = 'TRWAGMYFPDXBNJZSQVHLCKE'[numbers % 23];
+          return letter === expectedLetter;
+        }
+        
+        // NIE validation
+        const nieMatch = t.match(/^([XYZ])([0-9]{7})([A-Z])$/);
+        if (nieMatch) {
+          const prefix = nieMatch[1];
+          const numbers = parseInt(nieMatch[2]);
+          const letter = nieMatch[3];
+          const prefixNumbers = { 'X': 0, 'Y': 1, 'Z': 2 };
+          const fullNumber = prefixNumbers[prefix] * 10000000 + numbers;
+          const expectedLetter = 'TRWAGMYFPDXBNJZSQVHLCKE'[fullNumber % 23];
+          return letter === expectedLetter;
+        }
+        
+        return false;
       };
 
       function validate(show= false){
@@ -176,7 +224,8 @@
           if (show){
             if (!good){
               inputs[f].setAttribute("aria-invalid","true");
-              setText(msgs[f], "Camp obligatori", "err");
+              const errorMsg = f === "dni" ? "DNI o NIE no vàlid" : "Camp obligatori";
+              setText(msgs[f], errorMsg, "err");
               inputs[f].style.borderColor = "var(--error)";
               inputs[f].style.boxShadow = "0 0 0 4px rgba(239, 68, 68, .2)";
             } else {
@@ -227,27 +276,104 @@
         doc.setFontSize(11);
         doc.setFont(undefined, "normal");
         const head = [
-          `NOM: ${inputs.nom.value.trim()}`,
-          `COGNOMS: ${inputs.cognoms.value.trim()}`,
-          `DNI: ${inputs.dni.value.trim()}`,
-          `ADREÇA: ${inputs.adreca.value.trim()}`,
-          "",
-          "EXPOSA:"
+          `Interessat/da: ${inputs.nom.value.trim()} ${inputs.cognoms.value.trim()}`,
+          `DNI/NIF: ${inputs.dni.value.trim()}`,
+          `Domicili a efectes de notificació: ${inputs.adreca.value.trim()}`,
+          ""
         ];
         head.forEach((line)=>{
           if (y > 770) { doc.addPage(); y = marginTop; }
           doc.text(line, marginX, y); y += lineH + 2;
         });
 
-        const firstParagraph = "La proposta de canvi de denominació oficial contradiu informes tècnics, vulnera clarament la normativa i la legalitat municipal i autonòmica vigent i no respon a cap necessitat real ni lingüística ni social. Lluny de reforçar la convivència, genera divisió i crispació en un àmbit on no existia conflicte real, i suposa una despesa econòmica injustificada tant per a les administracions com per a la ciutadania.";
+        // EXPOSA section header
+        doc.setFont(undefined, "bold");
+        if (y > 770) { doc.addPage(); y = marginTop; }
+        doc.text("EXPOSA:", marginX, y); y += lineH + 4;
 
-        const lastParagraph = `SOL·LICITE: Que es tinguen per presentades estes al·legacions i, en conseqüència, es desestime la proposta de canvi de denominació del municipi de València per la forma dual “Valencia/Valéncia”, mantenint-se la forma oficial en valencià per ser la legalment establerta, coherent, eficient, lingüísticament fixada, i -com el propi reglament municipal diu- històrica i correcta: “València” en valencià. A València, a ${formatDateValencia()}`;
-
-        const bodyLines = doc.splitTextToSize(firstParagraph + "\\n\\n" + lastParagraph, 482);
-        bodyLines.forEach((line)=>{
+        // Content sections
+        doc.setFont(undefined, "normal");
+        const exposaParagraph = "La proposta de canvi de denominació oficial contradiu informes tècnics, vulnera clarament la normativa i la legalitat municipal i autonòmica vigent i no respon a cap necessitat real ni lingüística ni social. Lluny de reforçar la convivència, genera divisió i crispació en un àmbit on no existia conflicte real, i suposa una despesa econòmica injustificada tant per a les administracions com per a la ciutadania.";
+        
+        const exposaLines = doc.splitTextToSize(exposaParagraph, 482);
+        exposaLines.forEach((line)=>{
           if (y > 770) { doc.addPage(); y = marginTop; }
           doc.text(line, marginX, y); y += lineH + 2;
         });
+
+        y += 4; // Extra space before next section
+        
+        const introText = "Així, en relació amb l'anunci del B.O.P sobre el canvi de denominació del municipi de València publicat el 11/8/2025, l'acord adoptat pel Ple de l'Ajuntament de València, de data 26 de setembre de 2023, pel qual s'iniciava el procediment per a modificar la denominació oficial del municipi de \"València\" per la forma \"Valencia/Valéncia\" amb continuïtat en l'expedient E-01304-2025-000005-00, formule les següents";
+        
+        const introLines = doc.splitTextToSize(introText, 482);
+        introLines.forEach((line)=>{
+          if (y > 770) { doc.addPage(); y = marginTop; }
+          doc.text(line, marginX, y); y += lineH + 2;
+        });
+
+        y += 8; // Extra space before AL·LEGACIONS
+
+        // AL·LEGACIONS section header
+        doc.setFont(undefined, "bold");
+        if (y > 770) { doc.addPage(); y = marginTop; }
+        doc.text("AL·LEGACIONS", marginX, y); y += lineH + 6;
+
+        // Allegation points
+        doc.setFont(undefined, "normal");
+        const allegations = [
+          "• El municipi de València es troba en zona de predomini lingüístic valencià i no es justifica legalment el canvi.\nSegons la disposició addicional segona de la Llei 4/1983, d'Ús i Ensenyament del Valencià, la ciutat de València forma part del territori de predomini lingüístic valencià. El Decret 69/2017, de 2 de juny, del Consell, permet que la denominació oficial siga exclusivament en valencià en este cas, sent el camí natural que bona part dels municipis estan adoptant d'acord amb l'especial atenció cap a la recuperació de la llengua pròpia que li procura la legislació vigent.",
+          
+          "• La proposta de l'Ajuntament de València incompleix el Decret 69/2017 en l'ordre de les formes\nEl Decret 69/2017, en el seu article 4.3, establix que: \"En el cas que la denominació siga bilingüe, la forma en valencià figurarà en primer lloc en el cas de municipis situats en zones de predomini lingüístic valencià.\" La proposta \"Valencia/Valéncia\" incompleix este article, anteposant la forma en castellà a la valenciana.",
+          
+          "• El canvi del topònim vulnera el Reglament municipal d'ús del valencià\nEl Reglament d'ús del valencià de l'Ajuntament de València establix en el seu article 16.1: \"Tots els topònims del terme municipal tenen com a forma oficial la valenciana, que és la tradicional, la històrica i la correcta.\"",
+          
+          "• Cap informe a l'expedient argumenta el canvi més enllà d'aspectes ortogràfics\nL'únic informe lingüístic present en l'expedient és l'estudi d'Abelard Saragossà, que es limita a proposar un canvi ortogràfic sense defensar la forma bilingüe.",
+          
+          "• El canvi és lingüísticament innecessari i redundant\nEl doblet \"Valencia/Valéncia\" és completament redundant, ja que l'única diferència és un accent i la forma actual \"València\" és perfectament entesa per tota la població.",
+          
+          "• Un canvi estrictament polític i sense consens social\nEl canvi s'impulsa des de l'àmbit polític, al marge dels mecanismes normatius establerts i d'esquena a l'Acadèmia Valenciana de la Llengua.",
+          
+          "• El canvi pot comportar una despesa milionària i innecessària\nModificar la denominació obligaria a canviar tota la retolació urbana, amb un cost econòmic molt elevat sense benefici col·lectiu clar.",
+          
+          "• La forma \"València\" és la legal i vigent\nLa forma \"València\" va ser establida pel Decret 16/2017 amb informe favorable de l'Acadèmia Valenciana de la Llengua, dins d'un procediment plenament legal.",
+          
+          "• El canvi genera incoherència institucional\nMentre es proposa modificar el nom del municipi, altres institucions mantindran la forma \"València\", creant dissonància institucional.",
+          
+          "• El canvi suposa una regressió en la normalització del valencià\nModificar la forma \"València\" per una denominació duplicada suposa un retrocés simbòlic en termes de dignitat lingüística."
+        ];
+
+        allegations.forEach((allegation) => {
+          const allegationLines = doc.splitTextToSize(allegation, 482);
+          allegationLines.forEach((line)=>{
+            if (y > 770) { doc.addPage(); y = marginTop; }
+            doc.text(line, marginX, y); y += lineH + 2;
+          });
+          y += 4; // Extra space between allegations
+        });
+
+        y += 8; // Extra space before SOL·LICITE
+
+        // SOL·LICITE section header
+        doc.setFont(undefined, "bold");
+        if (y > 770) { doc.addPage(); y = marginTop; }
+        doc.text("SOL·LICITE:", marginX, y); y += lineH + 4;
+
+        // Final solicitation
+        doc.setFont(undefined, "normal");
+        const solicitation = "Que es tinguen per presentades estes al·legacions i, en conseqüència, es desestime la proposta de canvi de denominació del municipi de València per la forma dual \"Valencia/Valéncia\", mantenint-se la forma oficial en valencià per ser la legalment establerta, coherent, eficient, lingüísticament fixada, i -com el propi reglament municipal diu- històrica i correcta: \"València\" en valencià.";
+        
+        const solicitationLines = doc.splitTextToSize(solicitation, 482);
+        solicitationLines.forEach((line)=>{
+          if (y > 770) { doc.addPage(); y = marginTop; }
+          doc.text(line, marginX, y); y += lineH + 2;
+        });
+
+        y += 8; // Space before closing
+
+        // Closing with fixed location
+        const closing = "A València, 26 d'agost de 2025";
+        if (y > 770) { doc.addPage(); y = marginTop; }
+        doc.text(closing, marginX, y);
 
         // Blob + download URL
         const blob = doc.output("blob");
@@ -276,11 +402,21 @@
           if (!window.jspdf || !window.jspdf.jsPDF){ return setTimeout(tryBuild, 50); }
           const url = buildPdf();
           btnDl.href = url;
+          // Set custom filename based on user's name
+          const fileName = `Allegacio_${inputs.nom.value.trim().replace(/\s+/g, '_')}.pdf`;
+          btnDl.download = fileName;
           btnDl.style.display = "inline-flex";
           btnDl.click(); // autodescarrega
-          status.textContent = "PDF generat. Pots descarregar-lo o presentar-lo.";
+          
+          // Hide form and show success message
+          $("#form").style.display = "none";
+          $("h1").style.display = "none";
+          // Hide description paragraphs specifically
+          $("#desc1").style.display = "none";
+          $("#desc2").style.display = "none";
+          status.textContent = "";
           postGen.style.display = "block";
-          toastMsg("PDF llest!");
+          toastMsg("PDF generat i baixat!");
         };
         tryBuild();
       });
