@@ -2,9 +2,38 @@
 <html lang="ca">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
     <title>Al·legacions València — Generador PDF</title>
-    <meta name="description" content="Miniapp per generar un PDF d'al·legacions sobre el canvi de denominació del municipi de València." />
+    <meta name="description" content="Crea i baixa ràpidament la teua al·legació contra l'intent de canviar el nom històric de València. Defensa la forma oficial valenciana." />
+    <meta name="keywords" content="València, al·legacions, nom oficial, valencià, Catalá, PP, VOX, topònim" />
+    <meta name="author" content="Defensem València" />
+    <meta name="robots" content="index, follow" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Al·lega contra el canvi del nom de València" />
+    <meta property="og:description" content="Crea i baixa ràpidament la teua al·legació contra l'intent de María José Catalá de canviar el nom històric de València per una forma dual artificiosa." />
+    <meta property="og:image" content="./logo.svg" />
+    <meta property="og:url" content="https://defensavalencia.github.io/" />
+    <meta property="og:site_name" content="Defensa València" />
+    <meta property="og:locale" content="ca_ES" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Al·lega contra el canvi del nom de València" />
+    <meta name="twitter:description" content="Crea i baixa ràpidament la teua al·legació contra l'intent de canviar el nom històric de València. Defensa la forma oficial valenciana." />
+    <meta name="twitter:image" content="./logo.svg" />
+    <meta name="twitter:creator" content="@DefensaValencia" />
+    
+    <!-- Additional SEO -->
+    <meta name="theme-color" content="#d23517" />
+    <meta name="msapplication-TileColor" content="#d23517" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Defensa València" />
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://defensavalencia.github.io/" />
     <!-- jsPDF (UMD) -->
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" defer></script>
     <style>
@@ -374,8 +403,8 @@
         if (y > 770) { doc.addPage(); y = marginTop; }
         doc.text(closing, marginX, y);
 
-        // Blob + download URL
-        const blob = doc.output("blob");
+        // Blob + download URL with proper MIME type for download
+        const blob = new Blob([doc.output("blob")], { type: "application/octet-stream" });
         const url = URL.createObjectURL(blob);
         return url;
       }
@@ -405,7 +434,20 @@
           const fileName = `Allegacio_${inputs.nom.value.trim().replace(/\s+/g, '_')}.pdf`;
           btnDl.download = fileName;
           btnDl.style.display = "inline-flex";
-          btnDl.click(); // autodescarrega
+          
+          // Force download for iOS/Safari
+          if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+            // For iOS, create a temporary link and trigger download
+            const tempLink = document.createElement('a');
+            tempLink.href = url;
+            tempLink.download = fileName;
+            tempLink.style.display = 'none';
+            document.body.appendChild(tempLink);
+            tempLink.click();
+            document.body.removeChild(tempLink);
+          } else {
+            btnDl.click(); // autodescarrega for other browsers
+          }
           
           // Hide form and show success message
           $("#form").style.display = "none";
