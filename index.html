@@ -61,7 +61,7 @@
       html,body{height:100%}
       body{
         margin:0;
-        background:linear-gradient(135deg, #d23517, #f39128);
+        background: url('back.webp') center center/cover no-repeat;
         background-attachment: fixed;
         color:#353949;
         font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
@@ -152,12 +152,20 @@
       @media (max-width:640px){ 
         .grid{ grid-template-columns: 1fr; }
         .card{ padding: 20px; }
-        body{ padding: 16px; }
+        body{ 
+          padding: 16px; 
+          background-position: center center;
+          background-size: cover;
+        }
       }
       @media (max-width:480px){
         .card{ padding: 16px; }
         h1{ font-size: clamp(1.25rem, 4vw, 1.5rem); }
-        body{ padding: 12px; }
+        body{ 
+          padding: 12px; 
+          background-position: center center;
+          background-size: cover;
+        }
         button, a.btn{ 
           font-size: 1.125rem; 
           padding: 16px 24px; 
@@ -377,7 +385,7 @@
       </div>
     </main>
     <div style="text-align:center; margin-top:1rem; margin-bottom:2rem;">
-      <a href="privacy.html" style="color:#353949; text-decoration:underline; font-size:0.875rem;">Política de privacitat</a>
+      <a href="privacy.html" style="color:white; text-decoration:underline; font-size:0.875rem;">Política de privacitat</a>
     </div>
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
