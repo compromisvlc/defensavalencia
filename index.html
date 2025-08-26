@@ -87,15 +87,16 @@
         transition: transform .3s ease, box-shadow .3s ease;
       }
       .card:hover{ transform: translateY(-2px); box-shadow: 0 14px 40px rgba(0,0,0,.18); }
-      h1{ margin:.25rem 0 1rem; font-size: clamp(1.25rem, 2vw, 1.5rem); text-align:center }
+      h1{ margin:.25rem 0 1rem; font-size: clamp(1.5rem, 2.5vw, 1.875rem); text-align:center }
       .grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
       .grid .full{ grid-column: 1 / -1;}
-      label{ display:block; font-size:.9rem; font-weight:600; margin-bottom:6px }
+      label{ display:block; font-size:1rem; font-weight:600; margin-bottom:6px }
       input[type="text"]{
         width:100%;
-        padding:10px 12px;
+        padding:12px 14px;
         border:1px solid #d1d5db;
         border-radius:10px;
+        font-size:1rem;
         outline: none;
         transition: box-shadow .15s, border-color .15s, transform .05s;
       }
@@ -103,7 +104,7 @@
         border-color: var(--orange);
         box-shadow: 0 0 0 4px var(--ring);
       }
-      .msg{ font-size:.8rem; margin-top:6px; min-height:1.1em }
+      .msg{ font-size:.875rem; margin-top:6px; min-height:1.1em }
       .msg.ok{ color: var(--ok) }
       .msg.err{ color: var(--error) }
       .actions{ margin-top: 14px; display:flex; gap: 10px; flex-wrap: wrap; justify-content:center }
@@ -111,9 +112,9 @@
         appearance:none;
         border:0;
         border-radius: 12px;
-        padding: 12px 16px;
+        padding: 14px 20px;
         font-weight:700;
-        font-size: 1rem;
+        font-size: 1.125rem;
         color:#fff;
         background: #FF6720;
         cursor:pointer;
@@ -132,15 +133,16 @@
         font-weight:700;
         text-decoration: underline;
       }
-      .status{ text-align:center; margin-top:8px; font-size:.9rem }
+      .status{ text-align:center; margin-top:8px; font-size:1rem }
       .toast{
         position: fixed;
         left:50%; transform: translateX(-50%);
         bottom: 18px;
         background:#111827;
         color:#fff;
-        padding:10px 14px;
+        padding:12px 16px;
         border-radius: 12px;
+        font-size:1rem;
         box-shadow: 0 10px 30px rgba(0,0,0,.3);
         opacity:0; pointer-events:none;
         transition: opacity .3s ease, transform .3s ease;
@@ -154,12 +156,133 @@
       }
       @media (max-width:480px){
         .card{ padding: 16px; }
-        h1{ font-size: 1.25rem; }
+        h1{ font-size: clamp(1.25rem, 4vw, 1.5rem); }
         body{ padding: 12px; }
         button, a.btn{ 
-          font-size: 1.1rem; 
-          padding: 14px 20px; 
+          font-size: 1.125rem; 
+          padding: 16px 24px; 
         }
+        label{ font-size: 1rem; }
+        input[type="text"]{ 
+          font-size: 1rem; 
+          padding: 14px 16px; 
+        }
+        .status, .toast{ font-size: 1rem; }
+      }
+      
+      /* Instructions accordion styles */
+      .instructions-toggle {
+        background: transparent;
+        border: 2px solid var(--orange);
+        color: var(--orange);
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+      }
+      
+      .instructions-toggle:hover {
+        background: var(--orange);
+        color: white;
+      }
+      
+      .toggle-icon {
+        font-size: 1.2rem;
+        line-height: 1;
+        transition: transform 0.2s ease;
+      }
+      
+      .instructions-toggle[aria-expanded="true"] .toggle-icon {
+        transform: rotate(45deg);
+      }
+      
+      .instructions-panel {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease, padding 0.3s ease;
+        margin-top: 0;
+      }
+      
+      .instructions-panel[aria-hidden="false"] {
+        max-height: 2000px;
+        padding-top: 16px;
+      }
+      
+      .instructions-content {
+        background: #f8f9fa;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 8px;
+      }
+      
+      .instructions-content h3 {
+        color: var(--orange-ink);
+        font-size: 1.1rem;
+        margin: 0 0 12px 0;
+        font-weight: 700;
+      }
+      
+      .instructions-content h4 {
+        color: var(--text);
+        font-size: 1rem;
+        margin: 16px 0 8px 0;
+        font-weight: 600;
+      }
+      
+      .instructions-list {
+        margin: 0 0 16px 0;
+        padding-left: 20px;
+        text-align: left;
+      }
+      
+      .instructions-list li {
+        margin-bottom: 8px;
+        line-height: 1.5;
+        font-size: 0.95rem;
+      }
+      
+      .copy-text {
+        background: #fff;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        padding: 12px;
+        margin-top: 8px;
+        font-size: 0.875rem;
+        line-height: 1.4;
+        color: var(--muted);
+        border-left: 3px solid var(--orange);
+      }
+      
+      .address-list {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 12px 0;
+      }
+      
+      .address-list li {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 8px;
+      }
+      
+      .schedule {
+        color: var(--muted);
+        font-size: 0.875rem;
+      }
+      
+      .note {
+        font-size: 0.875rem;
+        color: var(--muted);
+        font-style: italic;
+        margin: 8px 0 0 0;
       }
     </style>
   </head>
@@ -167,7 +290,7 @@
     <img src="logo.svg" alt="Logo" class="logo">
     <main class="card" role="main">
       <h1>Crea i descarrega ràpidament la teua al·legació contra l'intent de María José Catalá de canviar el nom de València.      </h1>
-      <p id="subtitle" style="text-align: center; font-size: 0.9rem; color: #353949; margin: 0.5rem 0 1rem; line-height: 1.4;">Incapaç de solventar els problemes reals de la ciutat Catalá preferix crear-ne de nous. Qualsevol pot oposar-se a un canvi de nom de València innecessàri, irregular i car presentant al·legacions abans del <b>9 de setembre</b>. Amb este web et costarà poc més d'un minut.</p>
+      <p id="subtitle" style="text-align: center; font-size: 1rem; color: #353949; margin: 0.5rem 0 1rem; line-height: 1.4;">Incapaç de solventar els problemes reals de la ciutat Catalá preferix crear-ne de nous. Qualsevol pot oposar-se a un canvi de nom de València innecessàri, irregular i car presentant al·legacions abans del <b>9 de setembre</b>. Amb este web et costarà poc més d'un minut.</p>
       <p class="status" id="status" aria-live="polite"></p>
       <form id="form" novalidate>
         <div class="grid">
@@ -202,13 +325,59 @@
         <div style="text-align:center; margin-bottom:1.5rem">
           <a id="btnDl" href="#" download style="display:none; color:#d23517; text-decoration:underline; font-weight:500">Tornar a baixar PDF</a>
         </div>
-        <div style="display:flex; justify-content:center">
+        <div style="display:flex; justify-content:center; flex-direction:column; align-items:center; gap:12px">
           <a class="btn" href="https://sede.valencia.es/sede/authClave.xhtml/NC.NC.10" target="_blank" rel="noopener">Presentar al·legació</a>
+          <button id="toggleInstructions" class="instructions-toggle" type="button" aria-expanded="false">
+            <span>Mostrar instruccions</span>
+            <span class="toggle-icon">+</span>
+          </button>
+        </div>
+        <div id="instructionsPanel" class="instructions-panel" aria-hidden="true">
+          <div class="instructions-content">
+            <h3>Per a presentar digitalment el PDF a la Seu Electrònica:</h3>
+            <ol class="instructions-list">
+              <li>Clica al botó <strong>"Presentar al·legació"</strong></li>
+              <li>Identifica't amb <strong>Certificat digital</strong> o <strong>Cl@ve</strong></li>
+              <li>Completa el tràmit de <strong>"Sol·licituds no catalogades"</strong> amb les teues dades personals</li>
+              <li>
+                A la casella <strong>EXPOSA</strong> còpia el text:
+                <div class="copy-text">
+                  L'anunci del B.O.P. sobre el canvi de denominació del municipi de València publicat l'11/8/2025 vulnera flagrantment el dret que ens hem donat els valencians i valencianes, recollit a l'Estatut d'Autonomia, tal com desenvolupe en el document adjunt a aquesta al·legació.
+                </div>
+              </li>
+              <li>
+                A la casella <strong>SOL·LICITA</strong> còpia el text:
+                <div class="copy-text">
+                  Sol·licite que es desestime la proposta de canvi de denominació del municipi de València, tal com desenvolupe en el document adjunt a aquesta al·legació.
+                </div>
+              </li>
+              <li>Adjunta el <strong>document PDF</strong></li>
+              <li>Signa i envia. <strong>La teua al·legació ja està presentada</strong></li>
+            </ol>
+
+            <h3>Per a presentar-ho presencialment:</h3>
+            <ol class="instructions-list">
+              <li>Imprimeix el PDF descarregat i registra'l en qualsevol registre d'entrada dirigit a l'<strong>Ajuntament de València</strong></li>
+            </ol>
+
+            <h4>Direccions i horaris dels Registres:</h4>
+            <ul class="address-list">
+              <li>
+                <strong>Carrer Arquebisbe Mayoral, 1</strong><br>
+                <span class="schedule">De Dilluns a divendres de 8:30 a 14:00</span>
+              </li>
+              <li>
+                <strong>Carrer Amadeo de Saboya, 11</strong><br>
+                <span class="schedule">De Dilluns a divendres de 8:30 a 14:00</span>
+              </li>
+            </ul>
+            <p class="note">També a les Juntes Municipals de Districte i les alcaldies pedanies.</p>
+          </div>
         </div>
       </div>
     </main>
-    <div style="text-align:center; margin-top:1rem;">
-      <a href="privacy.html" style="color:#353949; text-decoration:underline; font-size:0.85rem;">Política de privacitat</a>
+    <div style="text-align:center; margin-top:1rem; margin-bottom:2rem;">
+      <a href="privacy.html" style="color:#353949; text-decoration:underline; font-size:0.875rem;">Política de privacitat</a>
     </div>
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
@@ -477,6 +646,28 @@
         };
         tryBuild();
       });
+
+      // Instructions accordion functionality
+      const toggleBtn = $("#toggleInstructions");
+      const panel = $("#instructionsPanel");
+      
+      if (toggleBtn && panel) {
+        toggleBtn.addEventListener("click", () => {
+          const isExpanded = toggleBtn.getAttribute("aria-expanded") === "true";
+          
+          if (isExpanded) {
+            // Collapse
+            toggleBtn.setAttribute("aria-expanded", "false");
+            panel.setAttribute("aria-hidden", "true");
+            toggleBtn.querySelector("span").textContent = "Mostrar instruccions";
+          } else {
+            // Expand
+            toggleBtn.setAttribute("aria-expanded", "true");
+            panel.setAttribute("aria-hidden", "false");
+            toggleBtn.querySelector("span").textContent = "Amagar instruccions";
+          }
+        });
+      }
     </script>
   </body>
 </html>
