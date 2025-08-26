@@ -167,7 +167,7 @@
     <img src="logo.svg" alt="Logo" class="logo">
     <main class="card" role="main">
       <h1>Crea i descarrega ràpidament la teua al·legació contra l'intent de María José Catalá de canviar el nom de València.      </h1>
-      <p id="limit" style="text-align: center; font-weight: bold; color: #FF6720; margin: 0.5rem 0 1rem;">Data límit: 9 de setembre</p>
+      <p id="subtitle" style="text-align: center; font-size: 0.9rem; color: #353949; margin: 0.5rem 0 1rem; line-height: 1.4;">Incapaç de solventar els problemes reals de la ciutat Catalá preferix crear-ne de nous. Qualsevol pot oposar-se a un canvi de nom de València innecessàri, irregular i car presentant al·legacions abans del <b>9 de setembre</b>. Amb este web et costarà poc més d'un minut.</p>
       <p class="status" id="status" aria-live="polite"></p>
       <form id="form" novalidate>
         <div class="grid">
@@ -467,7 +467,7 @@
           // Hide form and show success message
           $("#form").style.display = "none";
           $("h1").style.display = "none";
-          $("#limit").style.display = "none";
+          $("#subtitle").style.display = "none";
 
           status.textContent = "";
           postGen.style.display = "block";
